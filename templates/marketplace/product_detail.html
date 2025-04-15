@@ -1,0 +1,132 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - OSM Marketplace{% endblock %}
+
+{% block marketplace_content %}
+<div class="product-detail-container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="product-images">
+                {% if product.productimage_set.exists %}
+                    <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in product.productimage_set.all %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ image.image.url }}" class="d-block w-100" alt="Image of {{ product.name }}">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if product.productimage_set.count > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <img src="{% static 'marketplace/images/placeholder.png' %}" class="img-fluid" alt="No image available">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="product-info">
+                <h1 class="product-title">{{ product.name }}</h1>
+                <div class="product-condition mb-3">
+                    <p><strong>Condition:</strong> {{ product.condition }}</p>
+                </div>
+                <p class="product-seller">Sold by: <a href="{% url 'marketplace:seller_profile' product.seller.id %}">{{ product.seller.business_name }}</a></p>
+                
+                <div class="product-price">
+                    <h2>${{ product.price }}</h2>
+                </div>
+
+                <div class="product-stock mb-3">
+                    {% if product.stock > 0 %}
+                        <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
+                    {% else %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                    {% endif %}
+                </div>
+
+                <div class="product-description mb-4">
+                    {{ product.description|linebreaks }}
+                </div>
+
+                <div class="product-category mb-3">
+                    <span class="category-badge">{{ product.category.name }}</span>
+                </div>
+
+                {% if product.stock > 0 %}
+                    <form method="post" action="{% url 'add_to_cart' product.id %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </div>
+                    </form>
+                {% endif %}
+
+                <div class="seller-info card">
+                    <div class="card-body">
+                        <h5 class="card-title">About the Seller</h5>
+                        <p class="card-text">{{ product.seller.description|truncatewords:30 }}</p>
+                        <a href="{% url 'marketplace:seller_profile' product.seller.id %}" class="btn btn-outline-primary">View Seller Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if related_products %}
+        <div class="related-products mt-5">
+            <h3>Related Products</h3>
+            <div class="row">
+                {% for related in related_products %}
+                    <div class="col-md-3">
+                        <div class="card product-card">
+                            {% if related.productimage_set.first %}
+                                <img src="{{ related.productimage_set.first.image.url }}" class="card-img-top" alt="Image of {{ related.name }}">
+                            {% else %}
+                                <img src="{% static 'marketplace/images/placeholder.png' %}" class="card-img-top" alt="No image available">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ related.name }}</h5>
+                                <p class="card-text price">${{ related.price }}</p>
+                                <a href="{% url 'marketplace:product_detail' related.id %}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-images {
+        margin-bottom: 2rem;
+    }
+    .carousel-item img {
+        max-height: 500px;
+        object-fit: contain;
+    }
+    .product-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .product-price h2 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    .product-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}

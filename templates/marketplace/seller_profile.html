@@ -1,0 +1,98 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block title %}{{ seller.business_name }} - Seller Profile{% endblock %}
+
+{% block marketplace_content %}
+<div class="seller-profile-container">
+    <div class="row">
+        <!-- Left Column: Seller's Profile Image -->
+        <!-- <div class="col-md-4">
+            <div class="seller-image">
+                {% if seller.user.profile.profile_picture %}
+                    <img src="{{ seller.user.profile.profile_picture.url }}" class="img-fluid rounded-circle" alt="Profile picture of {{ seller.business_name }}">
+                {% else %}
+                    <img src="{% static 'marketplace/images/placeholder.png' %}" class="img-fluid rounded-circle" alt="No profile picture available">
+                {% endif %}
+            </div>
+        </div> -->
+
+        <!-- Right Column: Seller's Info -->
+        <div class="col-md-8">
+            <div class="seller-info">
+                <h1 class="seller-business-name">{{ seller.business_name }}</h1>
+
+                <div class="seller-contact-info mb-3">
+                    <p><strong>Email:</strong> {{ seller.contact_email }}</p>
+                    <p><strong>Phone:</strong> {{ seller.contact_phone }}</p>
+                </div>
+
+                <div class="seller-description mb-3">
+                    <h5>Description:</h5>
+                    <p>{{ seller.description|linebreaks }}</p>
+                </div>
+
+                <div class="seller-created-at mb-3">
+                    <strong>Account Created On:</strong> {{ seller.created_at|date:"F j, Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products from the Seller -->
+    <div class="seller-products mt-5">
+        <h3>Products by {{ seller.business_name }}</h3>
+        <div class="row">
+            {% for product in related_products %}
+                <div class="col-md-3">
+                    <div class="card product-card">
+                        {% if product.productimage_set.first %}
+                            <img src="{{ product.productimage_set.first.image.url }}" class="card-img-top" alt="Image of {{ product.name }}">
+                        {% else %}
+                            <img src="{% static 'marketplace/images/placeholder.png' %}" class="card-img-top" alt="No image available">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text price">${{ product.price }}</p>
+                            <a href="{% url 'marketplace:product_detail' product.id %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .seller-profile-container {
+        margin-top: 2rem;
+    }
+    .seller-image img {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+    }
+    .seller-business-name {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .seller-info p {
+        font-size: 1.1rem;
+    }
+    .seller-description p {
+        line-height: 1.6;
+    }
+    .seller-contact-info, .seller-description, .seller-created-at {
+        margin-bottom: 1.5rem;
+    }
+    .seller-products h3 {
+        margin-top: 2rem;
+    }
+    .product-card img {
+        max-height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
